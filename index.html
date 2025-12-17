@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tours virtuais 360° com gerenciamento de projetos, hotspots e visualização interativa.">
+    <meta name="keywords" content="tour virtual, 360, panorama, pannellum, gestão de projetos">
+    <meta name="theme-color" content="#667eea">
+    <meta property="og:title" content="AMBI360 - Gestão de Projetos">
+    <meta property="og:description" content="Crie e visualize projetos 360° com hotspots e navegação interativa.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="images/ARÉA GOURMET - 360.png">
+    <meta property="og:locale" content="pt_BR">
+    <link rel="icon" href="images/ARÉA GOURMET - 360.png">
+    <title>AMBI360 - Gestão de Projetos</title>
+    <link rel="preload" href="style.css" as="style">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a class="skip-link" href="#mainContent">Pular para o conteúdo principal</a>
+    <!-- Login Container -->
+    <main class="login-container" id="loginContainer" aria-labelledby="loginTitle">
+        <section class="login-box" role="region" aria-label="Área de login">
+            <div class="mode-toggle" role="group" aria-label="Alternar modo de acesso">
+                <span class="toggle-label">Usuário</span>
+                <label class="switch" aria-label="Alternar para Admin">
+                    <input type="checkbox" id="modeToggle" aria-controls="userLogin adminLogin" aria-pressed="false">
+                    <span class="slider" aria-hidden="true"></span>
+                </label>
+                <span class="toggle-label">Admin</span>
+            </div>
+            
+            <div id="userLogin">
+                <div class="login-header">
+                    <div class="logo" aria-hidden="true"><img src="logo-ambi360.svg" alt="AMBI360" style="width: 120px; height: 120px;"></div>
+                    <h1 id="loginTitle">Acesso ao Projeto</h1>
+                    <p class="subtitle">Entre com suas credenciais</p>
+                </div>
+                <form id="loginForm" novalidate>
+                    <div class="input-group">
+                        <label for="projectName" class="sr-only">Nome do Projeto</label>
+                        <input type="text" id="projectName" placeholder="Nome do Projeto" autocomplete="username" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="password" class="sr-only">Senha</label>
+                        <input type="password" id="password" placeholder="Senha" autocomplete="current-password" required>
+                    </div>
+                    <button type="submit" aria-label="Entrar como usuário" class="btn-primary w-100">Entrar</button>
+                </form>
+            </div>
+            
+            <div id="adminLogin" class="hidden">
+                <div class="login-header">
+                    <div class="logo" aria-hidden="true"><img src="images/logo-ambi360.svg" alt="AMBI360" style="width: 120px; height: 120px;"></div>
+                    <h2>Painel Admin</h2>
+                    <p class="subtitle">Acesso administrativo</p>
+                </div>
+                <form id="adminForm" novalidate>
+                    <div class="input-group">
+                        <label for="adminPassword" class="sr-only">Senha Admin</label>
+                        <input type="password" id="adminPassword" placeholder="Senha Admin" autocomplete="current-password" required>
+                    </div>
+                    <button type="submit" aria-label="Entrar como administrador" class="btn-primary w-100">Entrar como Admin</button>
+                </form>
+            </div>
+            
+            <div id="errorMessage" class="error hidden" role="alert" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <!-- Viewer Container -->
+    <section class="viewer-container hidden" id="viewerContainer" aria-label="Visualizador 360º">
+        <!-- Navigation Sidebar -->
+        <aside class="nav-sidebar" id="navSidebar" aria-label="Navegação de ambientes">
+            <div class="nav-header">
+                <h2 id="navProjectTitle">Projeto</h2>
+                <button class="nav-close" onclick="toggleNavigation()" aria-label="Fechar navegação">✕</button>
+            </div>
+            <div class="nav-content">
+                <div class="nav-section">
+                    <h3>Ambientes</h3>
+                    <div class="nav-rooms" id="navRooms" aria-live="polite"></div>
+                </div>
+            </div>
+            <div class="nav-footer">
+                <button class="nav-logout" id="logoutBtn" aria-label="Sair">Sair</button>
+            </div>
+        </aside>
+        
+        <!-- Main Viewer -->
+        <div class="viewer-main" id="mainContent">
+            <header class="viewer-header">
+                <h1 class="viewer-title" id="projectTitle"></h1>
+                <div class="viewer-controls">
+                    <button class="control-btn" onclick="toggleFullscreen()" aria-label="Entrar em tela cheia">⛶ Tela Cheia</button>
+                    <button class="control-btn" onclick="showHelpModal()" aria-haspopup="dialog" aria-controls="helpModal">❓ Ajuda</button>
+                </div>
+            </header>
+            <div id="panorama" role="application" aria-label="Panorama interativo"></div>
+        </div>
+    </section>
+
+    <!-- Admin Panel -->
+    <section class="admin-panel hidden" id="adminPanel" aria-label="Painel administrativo">
+        <!-- Sidebar -->
+        <div class="sidebar" role="navigation" aria-label="Menu lateral">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="images/logo-ambi-sidebar.svg" alt="AMBI360" style="width: 180px; height: 180px; border-radius: 0;">
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="showSection('projects')" aria-current="page">
+                    <span class="nav-icon" aria-hidden="true">📋</span>
+                    <span>Projetos</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('create')">
+                    <span class="nav-icon" aria-hidden="true">➕</span>
+                    <span>Criar Projeto</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="adminLogoutBtn" aria-label="Sair do painel">Sair</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="admin-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div>
+                    <h1 class="page-title" id="pageTitle">Projetos</h1>
+                    <p class="page-subtitle" id="pageSubtitle">Aqui você faz a gestão de seus projetos.</p>
+                </div>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <span class="search-icon" aria-hidden="true">🔍</span>
+                        <input type="text" class="search-input" placeholder="Pesquise por projetos aqui" aria-label="Pesquisar projetos">
+                    </div>
+                    <button id="themeToggleBtn" class="btn-secondary" type="button" aria-pressed="false" onclick="toggleDarkMode()">Modo Escuro</button>
+                    <button class="btn-primary" onclick="showSection('create')">
+                        <span aria-hidden="true">➕</span>
+                        Criar Projeto
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Body -->
+            <div class="content-body">
+                <!-- Projects Section -->
+                <section id="projectsSection" aria-labelledby="projectsTitle">
+                    <div class="projects-header">
+                        <h2 class="section-title" id="projectsTitle">Todos os projetos</h2>
+                        <div class="filter-buttons" role="group" aria-label="Filtros de projetos">
+                            <button class="filter-btn active">TODOS</button>
+                            <button class="filter-btn">MAIS RECENTES</button>
+                        </div>
+                    </div>
+                    
+                    <div class="projects-grid" id="projectsGrid" aria-live="polite"></div>
+                    
+                    <div class="empty-state hidden" id="emptyState">
+                        <div class="empty-icon" aria-hidden="true">📁</div>
+                        <h3>Nenhum projeto encontrado</h3>
+                        <p>Crie seu primeiro projeto usando o botão acima</p>
+                    </div>
+                </section>
+
+                <!-- Create Project Section -->
+                <section id="createSection" class="hidden" aria-labelledby="createTitle">
+                    <div class="admin-section">
+                        <h2 id="createTitle">Criar Novo Projeto</h2>
+                        <form id="createProjectForm" novalidate>
+                            <div class="form-group">
+                                <label class="form-label" for="newProjectName">Nome do Projeto</label>
+                                <input type="text" class="form-input" id="newProjectName" placeholder="Digite o nome do projeto" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="newProjectPassword">Senha do Projeto</label>
+                                <input type="password" class="form-input" id="newProjectPassword" placeholder="Digite a senha" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="newProjectTitle">Título do Projeto</label>
+                                <input type="text" class="form-input" id="newProjectTitle" placeholder="Digite o título" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="imageUpload">Imagem 360°</label>
+                                <div class="file-upload" onclick="document.getElementById('imageUpload').click()" role="button" aria-label="Selecionar imagem 360°">
+                                    <input type="file" id="imageUpload" accept="image/*" style="display: none;" required>
+                                    <div>📷 Clique para selecionar uma imagem 360°</div>
+                                    <small>Formatos suportados: JPG, PNG</small>
+                                </div>
+                            </div>
+                            <div id="imagePreview" class="hidden" aria-live="polite">
+                                <h3>Prévia da Imagem 360°:</h3>
+                                <div class="preview-controls">
+                                    <button type="button" id="addHotspotBtn" class="btn-secondary">Adicionar Ponto</button>
+                                    <button type="button" id="removeHotspotBtn" class="btn-danger">Remover Pontos</button>
+                                </div>
+                                <div class="preview-layout">
+                                    <div class="preview-panorama">
+                                        <div id="previewPanorama" aria-label="Prévia do panorama"></div>
+                                    </div>
+                                    <div class="preview-sidebar" aria-label="Lista de hotspots">
+                                        <div id="hotspotsList"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <button type="submit" class="create-btn" id="submitProjectBtn">Criar Projeto</button>
+                                <button type="button" class="btn-secondary" id="cancelCreateBtn" onclick="showSection('projects')">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+        <div class="modal-backdrop" onclick="closeHelpModal()"></div>
+        <div class="modal-content" role="document">
+            <div class="modal-header">
+                <h2 id="helpTitle">Ajuda</h2>
+                <button class="modal-close" onclick="closeHelpModal()" aria-label="Fechar">✕</button>
+            </div>
+            <div class="modal-body">
+                <ul>
+                    <li>Mouse: arraste para rotacionar</li>
+                    <li>Scroll: zoom in/out</li>
+                    <li>Clique nos pontos para navegar</li>
+                    <li>ESC: sair do modo tela cheia</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="closeHelpModal()">Entendi</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css">
+    <script src="script.js" defer></script>
+</body>
+</html>
